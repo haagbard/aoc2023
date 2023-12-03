@@ -1,22 +1,17 @@
-with open('aoc2023/day1/input.txt', 'r') as file:
+import re
+
+file = 'aoc2023/day1/input.txt'
+
+with open(file, 'r') as file:
     lines = file.read().splitlines()
-#with open('aoc2023/day1/training_data.txt', 'r') as file:
-#    lines = file.read().splitlines()
+
+digits_re = r"(\d)"
 
 digits = []
 
 for line in lines:
-    first_digit = -1
-    last_digit = -1
-    for x in line:
-        if x.isdigit():
-            first_digit = x
-            break
-    for x in reversed(line):
-        if x.isdigit():
-            last_digit = x
-            break
-    digit = int(f'{first_digit}{last_digit}')
+    all_digits = re.findall(digits_re,line)
+    digit = int(f'{all_digits[0]}{all_digits.pop()}')
     digits.append(digit)
 
 sum = 0
