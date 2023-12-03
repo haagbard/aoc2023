@@ -20,11 +20,16 @@ for index, line in enumerate(lines):
     numbers_re = r"(\d+)"
     all_numbers = re.findall(numbers_re, line)
 
+    last_index = 0
+
     for crnt_number in all_numbers:
-        all_non_words_re = r"([^a-zA-Z0-9\.\n])"
+        #all_non_words_re = r"([^a-zA-Z0-9\.\n])"
+        no_and_dots_re = r"([^0-9\.\n])"
         
-        start_index = line.index(crnt_number)
+        start_index = line.index(crnt_number, last_index)
         end_index = start_index + len(crnt_number)
+
+        last_index = end_index
 
         start_offset_index = start_index - 1
         end_offset_index = end_index + 1
@@ -38,20 +43,31 @@ for index, line in enumerate(lines):
         # Line above
         if prev_index_line != 'N/A':
             sub_str = prev_index_line[start_offset_index:end_offset_index]
-            if len(re.findall(all_non_words_re, sub_str)) != 0:
+            if len(re.findall(no_and_dots_re, sub_str)) != 0:
                 part = True
         # Line below
         if next_index_line != 'N/A':
             sub_str = next_index_line[start_offset_index:end_offset_index]
-            if len(re.findall(all_non_words_re, sub_str)) != 0:
+            if len(re.findall(no_and_dots_re, sub_str)) != 0:
                 part = True
         # Current line
         sub_str = line[start_offset_index:end_offset_index]
-        if len(re.findall(all_non_words_re, sub_str)) != 0:
+        if len(re.findall(no_and_dots_re, sub_str)) != 0:
             part = True
+
+        if all_numbers[0] == '699':
+            print('break..')
+
+        #if crnt_number in ['795','940','539','491']:
+        #    print('break..')
+
+        if index == 139:
+            print('break..')
 
         if part:
             part_numbers.append(crnt_number)
+        #else:
+        #    print('debug')
 
 sum = 0
 
