@@ -54,20 +54,8 @@ for index, line in enumerate(lines):
         sub_str = line[start_offset_index:end_offset_index]
         if len(re.findall(no_and_dots_re, sub_str)) != 0:
             part = True
-
-        if all_numbers[0] == '699':
-            print('break..')
-
-        #if crnt_number in ['795','940','539','491']:
-        #    print('break..')
-
-        if index == 139:
-            print('break..')
-
         if part:
             part_numbers.append(crnt_number)
-        #else:
-        #    print('debug')
 
 sum = 0
 
