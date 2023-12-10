@@ -91,7 +91,7 @@ def step_next(x, y, steps_taken, already_stepped):
                 already_stepped.append(str_step)
                 steps_taken += 1
 
-                thread = ThreadStepper(target=step_next, args=(x,y,1,already_stepped))
+                thread = ThreadStepper(target=step_next, args=(x,y,steps_taken,already_stepped))
                 threads.append(thread)
             
             for thread in threads:
@@ -129,10 +129,6 @@ for valid_move in valid_moves:
     already_stepped.append(f'{x}:{y}')
     thread = ThreadStepper(target=step_next, args=(x,y,1,already_stepped))
     threads.append(thread)
-    #steps = step_next(x, y, 1)
-    # Account for last step:
-    #steps += 1
-    #steps_all.append(steps)
 
 for thread in threads:
     thread.start()
