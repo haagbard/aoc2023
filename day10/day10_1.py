@@ -2,6 +2,8 @@ import sys
 
 file = 'aoc2023/day10/input.txt'
 
+already_stepped = []
+
 sys.setrecursionlimit(20000)
 new_limit = sys.getrecursionlimit()
 print(f'recusionlimit: {new_limit}')
@@ -9,7 +11,7 @@ print(f'recusionlimit: {new_limit}')
 with open(file, 'r') as file:
     lines = file.read().splitlines()
 
-def check_valid_moves(x, y, already_stepped):
+def check_valid_moves(x, y):
     ret = {}
     counter = 0
     
@@ -59,24 +61,10 @@ def check_valid_moves(x, y, already_stepped):
                 ret[counter] = [tmp_x, tmp_y]
                 counter += 1
 
-    if len(ret) > 1:
-        print('find out')
-        current_char = lines[y][x:x+1]
-        if current_char == 'S': # Start position so it's ok
-            return ret 
-        else:
-            for ret_tmp in ret:
-                next_pos = ret[ret_tmp]
-                x1 = next_pos[0]
-                y1 = next_pos[1]
-                next_char = lines[y1][x1]
-                print(f'next_char: {next_char}')
-        print(f'{current_char}')
-
     return ret
 
-def step_next(x, y, steps_taken, already_stepped):
-    steps = check_valid_moves(x, y, already_stepped)
+def step_next(x, y, steps_taken):
+    steps = check_valid_moves(x, y)
     if lines[y][x:x+1] == 'S' and steps_taken != 0: # No more steps..
         steps_taken += 1
         return steps_taken
@@ -87,9 +75,7 @@ def step_next(x, y, steps_taken, already_stepped):
             str_step = f'{x}:{y}'
             already_stepped.append(str_step)
             steps_taken += 1
-            return step_next(x, y, steps_taken, already_stepped)
-        elif len(steps) > 1:
-            print('How??')
+            return step_next(x, y, steps_taken)
         else:
             pass
             
@@ -110,15 +96,10 @@ print(f'Starting at {start_x}, {start_y}')
 x = start_x
 y = start_y
 
-steps_all = []
+valid_moves = check_valid_moves(x, y) # Start directions
+x = valid_moves[0][0]
+y = valid_moves[0][1]
+already_stepped.append(f'{x}:{y}')
+steps = step_next(x, y, 1)
 
-valid_moves = check_valid_moves(x,y, {}) # Start directions
-for valid_move in valid_moves:
-    already_stepped = []
-    x = valid_moves[valid_move][0]
-    y = valid_moves[valid_move][1]
-    already_stepped.append(f'{x}:{y}')
-    steps_all.append(step_next(x, y, 1, already_stepped))
-
-print(steps_all)
-print(int(max(steps_all)/2))
+print(int(steps/2))
