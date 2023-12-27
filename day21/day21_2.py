@@ -1,21 +1,12 @@
 import time
-import copy
-from alive_progress import alive_bar
 import math
+
+start_time = time.time()
 
 file = 'aoc2023/day21/input.txt'
 
 with open(file, 'r') as file:
     lines = file.read().splitlines()
-
-def replacer(s, newstring, index, nofail=False):
-    if not nofail and index not in range(len(s)):
-        raise ValueError("index outside given string")
-    if index < 0:  # add it to the beginning
-        return newstring + s
-    if index > len(s):  # add it to the end
-        return s + newstring
-    return s[:index] + newstring + s[index + 1:]
 
 def check_surroundings(x, y):
     if y - 1 >= 0:
@@ -39,11 +30,7 @@ def check_surroundings(x, y):
     return True
 
 max_steps = 26501365
-#max_steps = 500
-
-logged_steps = set()
-
-next_steps = []
+#max_steps = 10
 
 # Find start
 for y, line in enumerate(lines):
@@ -51,72 +38,51 @@ for y, line in enumerate(lines):
         if char == 'S':
             start_pos = (x, y)
 
-# Make a copy
-lines_origin = copy.deepcopy(lines)
+steps_for_odd = 0
+steps_for_even = 0
 
-# Replace 'S' with '.'
-lines_origin[start_pos[1]] = replacer(lines_origin[start_pos[1]], '.', start_pos[0])
-
-x_extend = math.ceil((max_steps + start_pos[0]) / len(lines[0]))
-y_extend = math.ceil((max_steps + start_pos[1]) / len(lines))
-
-with alive_bar(y_extend) as bar:
-    # Expand Y
-    for i in range(0, y_extend):
-        lines[:0] = lines_origin
-        lines.extend(lines_origin)
-        bar()
-print('Expanded Y')
-
-with alive_bar(len(lines)) as bar:
-# Expand X
-    for y_pos in range(0, len(lines)):
-        original_position = y_pos % len(lines_origin)
-        prepend_str = lines_origin[original_position] * x_extend
-        lines[y_pos] = f'{prepend_str}{lines[y_pos]}{prepend_str}'
-        bar()
-print('Expanded X')
-
-start_time = time.time()
-
-# Find start again
+# Find all the amount of marked "." for odd and even squares
 for y, line in enumerate(lines):
     for x, char in enumerate(line):
-        if char == 'S':
-            start_pos = (x, y)
+        if char == '.' or char == 'S':
+            steps_x = abs(x - start_pos[0])
+            steps_y = abs(y - start_pos[1])
+            total_steps = steps_x + steps_y
+            if total_steps % 2 == 0 and check_surroundings(x, y): # Even steps
+                steps_for_even += 1
+            if total_steps % 2 == 1 and check_surroundings(x, y): # Odd steps
+                steps_for_odd += 1
 
-next_steps.append((start_pos[0], start_pos[1], 0))
 
-# Replace 'S' with '.'
-lines[start_pos[1]] = replacer(lines[start_pos[1]], '.', start_pos[0])
+steps_for_odd_corners = 0
+steps_for_even_corners = 0
 
-odd_or_even = max_steps % 2
+# And for corners, we count everything where steps > x
+for y, line in enumerate(lines):
+    for x, char in enumerate(line):
+        if char == '.' or char == 'S':
+            steps_x = abs(x - start_pos[0])
+            steps_y = abs(y - start_pos[1])
+            total_steps = steps_x + steps_y
+            if total_steps % 2 == 0 and total_steps > start_pos[0] and check_surroundings(x, y): # Even steps
+                steps_for_even_corners += 1
+            if total_steps % 2 == 1 and total_steps > start_pos[0] and check_surroundings(x, y): # Odd steps
+                steps_for_odd_corners += 1
 
-max_field = len(lines) * len(lines[0])
+# Squares from start to edge = (max_steps - start_position_x) / length_of_square
+# In this instance, square is 131x131, so amount of squares from start to edge = (26501365 - 65) / 131
+amount_squares = int((max_steps - start_pos[0]) / len(lines))
 
-with alive_bar(max_field) as bar:
+amount_odd_squares = int(math.pow(amount_squares + 1, 2))
+amount_even_squares = int(math.pow(amount_squares, 2))
 
-    for y, line in enumerate(lines):
-        for x, char in enumerate(line):
-            if char == '.':
-                steps_x = abs(x - start_pos[0])
-                steps_y = abs(y - start_pos[1])
-                if check_surroundings(x, y):
-                    total_steps = steps_x + steps_y
-                    if total_steps <= max_steps and total_steps % 2 == odd_or_even: # if less or eq to max_steps and even amount of steps.
-                        logged_steps.add((x, y))
-            bar()
+print(f'Steps per odd square: {steps_for_odd}, steps for even: {steps_for_even}')
+print(f'Steps per odd square corners: {steps_for_odd_corners}, steps for even corners: {steps_for_even_corners}')
 
-for y in range(0, len(lines)):
-    for x in range(0, len(lines[0])):
-        if (x, y) in logged_steps:
-            line = lines[y]
-            line = replacer(line,'O',x)
-            lines[y] = line
+print(f'Amount odd: {amount_odd_squares}, amount even: {amount_even_squares}')
 
-#for line in lines:
-#    print(line)
+sum = (amount_odd_squares * steps_for_odd) + (amount_even_squares * steps_for_even) - ((amount_squares+1) * steps_for_odd_corners) + (amount_squares * steps_for_even_corners)
 
-print(len(logged_steps))
+print(f'Sum: {sum}')
 
 print("--- %s seconds ---" % (time.time() - start_time))
