@@ -60,6 +60,14 @@ lines_origin[start_pos[1]] = replacer(lines_origin[start_pos[1]], '.', start_pos
 x_extend = math.ceil((max_steps + start_pos[0]) / len(lines[0]))
 y_extend = math.ceil((max_steps + start_pos[1]) / len(lines))
 
+with alive_bar(y_extend) as bar:
+    # Expand Y
+    for i in range(0, y_extend):
+        lines[:0] = lines_origin
+        lines.extend(lines_origin)
+        bar()
+print('Expanded Y')
+
 with alive_bar(len(lines)) as bar:
 # Expand X
     for y_pos in range(0, len(lines)):
@@ -68,14 +76,6 @@ with alive_bar(len(lines)) as bar:
         lines[y_pos] = f'{prepend_str}{lines[y_pos]}{prepend_str}'
         bar()
 print('Expanded X')
-
-with alive_bar(y_extend) as bar:
-    # Expand Y
-    for i in range(0, y_extend):
-        lines[:0] = lines_origin
-        lines.extend(lines_origin)
-        bar()
-print('Expanded Y')
 
 start_time = time.time()
 
