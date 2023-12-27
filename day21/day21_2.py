@@ -1,6 +1,7 @@
 import time
 import copy
 from alive_progress import alive_bar
+import math
 
 file = 'aoc2023/day21/input.txt'
 
@@ -56,26 +57,25 @@ lines_origin = copy.deepcopy(lines)
 # Replace 'S' with '.'
 lines_origin[start_pos[1]] = replacer(lines_origin[start_pos[1]], '.', start_pos[0])
 
-with alive_bar(max_steps) as bar:
-    # Expand Y
-    while len(lines) - max_steps - start_pos[1] <= 0:
-        for y_pos in range(0, len(lines_origin)):
-            new_line_append = lines_origin[y_pos]
-            lines.insert(y_pos, new_line_append)
-            lines.append(new_line_append)
-            bar()
-print('Expanded Y')
+x_extend = math.ceil((max_steps + start_pos[0]) / len(lines[0]))
+y_extend = math.ceil((max_steps + start_pos[1]) / len(lines))
 
-with alive_bar(max_steps) as bar:
+with alive_bar(len(lines)) as bar:
 # Expand X
-    while len(lines[0]) - max_steps - start_pos[0] <= 0:
-        for y_pos in range(0, len(lines)):
-            line = lines[y_pos]
-            original_position = y_pos % (len(lines_origin))
-            new_line_append = lines_origin[original_position]
-            lines[y_pos] = f'{new_line_append}{line}{new_line_append}'
-            bar()
+    for y_pos in range(0, len(lines)):
+        original_position = y_pos % len(lines_origin)
+        prepend_str = lines_origin[original_position] * x_extend
+        lines[y_pos] = f'{prepend_str}{lines[y_pos]}{prepend_str}'
+        bar()
 print('Expanded X')
+
+with alive_bar(y_extend) as bar:
+    # Expand Y
+    for i in range(0, y_extend):
+        lines[:0] = lines_origin
+        lines.extend(lines_origin)
+        bar()
+print('Expanded Y')
 
 start_time = time.time()
 
